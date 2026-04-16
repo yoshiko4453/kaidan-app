@@ -2,7 +2,7 @@
   "name": "階段カウンター",
   "short_name": "階段",
   "description": "毎日の階段を記録するアプリ",
-  "start_url": "/",
+  "start_url": "/kaidan-app/",
   "display": "standalone",
   "background_color": "#f2f2f7",
   "theme_color": "#007aff",
