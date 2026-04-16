@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="階段カウンター">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon.png">
+  <title>階段カウンター</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+      background: #f2f2f7;
+      color: #1c1c1e;
+      min-height: 100vh;
+      padding-bottom: 40px;
+    }
+
+    header {
+      background: #fff;
+      padding: 16px 20px 12px;
+      border-bottom: 1px solid #e5e5ea;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    header h1 {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    header p {
+      font-size: 13px;
+      color: #8e8e93;
+      margin-top: 2px;
+    }
+
+    .today-card {
+      background: #007aff;
+      color: white;
+      margin: 16px;
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .today-card .label {
+      font-size: 14px;
+      opacity: 0.85;
+    }
+
+    .today-card .count {
+      font-size: 72px;
+      font-weight: 700;
+      line-height: 1.1;
+      margin: 4px 0;
+    }
+
+    .today-card .unit {
+      font-size: 16px;
+      opacity: 0.85;
+    }
+
+    .section {
+      margin: 0 16px 16px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #8e8e93;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      padding-left: 4px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .btn-home {
+      width: 100%;
+      padding: 18px 20px;
+      background: none;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 17px;
+      color: #007aff;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .btn-home:active {
+      background: #f2f2f7;
+    }
+
+    .btn-home .steps-badge {
+      background: #007aff;
+      color: white;
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .divider {
+      height: 1px;
+      background: #e5e5ea;
+      margin-left: 20px;
+    }
+
+    .outside-row {
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .outside-row label {
+      font-size: 17px;
+      flex: 1;
+    }
+
+    .outside-row input {
+      width: 80px;
+      padding: 8px 10px;
+      border: 1.5px solid #e5e5ea;
+      border-radius: 8px;
+      font-size: 17px;
+      text-align: center;
+      outline: none;
+    }
+
+    .outside-row input:focus {
+      border-color: #007aff;
+    }
+
+    .btn-add {
+      background: #007aff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-add:active {
+      opacity: 0.8;
+    }
+
+    .history-list {
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .history-item {
+      display: flex;
+      align-items: center;
+      padding: 14px 20px;
+      gap: 12px;
+    }
+
+    .history-item + .history-item {
+      border-top: 1px solid #e5e5ea;
+    }
+
+    .history-date {
+      font-size: 15px;
+      color: #1c1c1e;
+      flex: 1;
+    }
+
+    .history-total {
+      font-size: 17px;
+      font-weight: 700;
+      color: #007aff;
+    }
+
+    .history-detail {
+      font-size: 12px;
+      color: #8e8e93;
+      text-align: right;
+    }
+
+    .btn-clear-today {
+      width: 100%;
+      padding: 14px;
+      background: none;
+      border: none;
+      color: #ff3b30;
+      font-size: 15px;
+      cursor: pointer;
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .btn-clear-today:active {
+      opacity: 0.7;
+    }
+
+    .empty {
+      text-align: center;
+      color: #8e8e93;
+      font-size: 15px;
+      padding: 24px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #1c1c1e;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 14px;
+      opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>階段カウンター</h1>
+  <p id="today-label">今日の記録</p>
+</header>
+
+<div class="today-card">
+  <div class="label">今日の合計</div>
+  <div class="count" id="today-total">0</div>
+  <div class="unit">段</div>
+</div>
+
+<div class="section">
+  <div class="section-title">記録する</div>
+  <div class="card">
+    <button class="btn-home" onclick="addHome()">
+      家の階段を記録
+      <span class="steps-badge">14段</span>
+    </button>
+    <div class="divider"></div>
+    <div class="outside-row">
+      <label for="outside-input">外の階段</label>
+      <input type="number" id="outside-input" placeholder="段数" min="1" max="9999">
+      <button class="btn-add" onclick="addOutside()">追加</button>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">履歴</div>
+  <div class="history-list" id="history-list">
+    <div class="empty">まだ記録がありません</div>
+  </div>
+</div>
+
+<div class="section">
+  <button class="btn-clear-today" onclick="clearToday()">今日の記録をリセット</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const HOME_STEPS = 14;
+
+  function getToday() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
+  function formatDate(dateStr) {
+    const d = new Date(dateStr + 'T00:00:00');
+    const today = getToday();
+    if (dateStr === today) return '今日';
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth()+1).padStart(2,'0')}-${String(yesterday.getDate()).padStart(2,'0')}`;
+    if (dateStr === yStr) return '昨日';
+    return `${d.getMonth()+1}月${d.getDate()}日`;
+  }
+
+  function loadData() {
+    return JSON.parse(localStorage.getItem('kaidan_data') || '{}');
+  }
+
+  function saveData(data) {
+    localStorage.setItem('kaidan_data', JSON.stringify(data));
+  }
+
+  function getTodayRecord() {
+    const data = loadData();
+    const today = getToday();
+    if (!data[today]) {
+      data[today] = { home: 0, outside: 0, total: 0, entries: [] };
+    }
+    return { data, today };
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 1800);
+  }
+
+  function addHome() {
+    const { data, today } = getTodayRecord();
+    data[today].home += HOME_STEPS;
+    data[today].total += HOME_STEPS;
+    data[today].entries.push({ type: 'home', steps: HOME_STEPS, time: new Date().toLocaleTimeString('ja-JP', {hour:'2-digit', minute:'2-digit'}) });
+    saveData(data);
+    render();
+    showToast(`家の階段 +${HOME_STEPS}段`);
+  }
+
+  function addOutside() {
+    const input = document.getElementById('outside-input');
+    const steps = parseInt(input.value);
+    if (!steps || steps < 1) {
+      showToast('段数を入力してください');
+      return;
+    }
+    const { data, today } = getTodayRecord();
+    data[today].outside += steps;
+    data[today].total += steps;
+    data[today].entries.push({ type: 'outside', steps, time: new Date().toLocaleTimeString('ja-JP', {hour:'2-digit', minute:'2-digit'}) });
+    saveData(data);
+    input.value = '';
+    render();
+    showToast(`外の階段 +${steps}段`);
+  }
+
+  function clearToday() {
+    if (!confirm('今日の記録をリセットしますか？')) return;
+    const data = loadData();
+    const today = getToday();
+    delete data[today];
+    saveData(data);
+    render();
+  }
+
+  function render() {
+    const data = loadData();
+    const today = getToday();
+    const todayRecord = data[today] || { total: 0 };
+
+    document.getElementById('today-total').textContent = todayRecord.total || 0;
+
+    const d = new Date();
+    document.getElementById('today-label').textContent =
+      `${d.getMonth()+1}月${d.getDate()}日（${['日','月','火','水','木','金','土'][d.getDay()]}）の記録`;
+
+    const histList = document.getElementById('history-list');
+    const dates = Object.keys(data).sort((a,b) => b.localeCompare(a));
+
+    if (dates.length === 0) {
+      histList.innerHTML = '<div class="empty">まだ記録がありません</div>';
+      return;
+    }
+
+    histList.innerHTML = dates.slice(0, 14).map((date, i) => {
+      const r = data[date];
+      const parts = [];
+      if (r.home) parts.push(`家 ${r.home}段`);
+      if (r.outside) parts.push(`外 ${r.outside}段`);
+      return `
+        <div class="history-item">
+          <div>
+            <div class="history-date">${formatDate(date)}</div>
+            <div class="history-detail">${parts.join(' / ') || '記録なし'}</div>
+          </div>
+          <div class="history-total">${r.total}段</div>
+        </div>
+        ${i < dates.slice(0,14).length - 1 ? '' : ''}
+      `;
+    }).join('');
+  }
+
+  // Enterキーで追加
+  document.getElementById('outside-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addOutside();
+  });
+
+  render();
+
+  // Service Worker登録
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
+</script>
+</body>
+</html>
